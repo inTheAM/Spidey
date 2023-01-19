@@ -46,6 +46,12 @@ internal protocol NetworkManagerProtocol {
         response: Response.Type?) -> AnyPublisher<Response, RequestError>
     where Response: Decodable
     
+    func performRequest<Response>(
+        endpoint: Endpoint,
+        authType: AuthType,
+        response: Response.Type?) async throws -> Response
+    where Response: Decodable
+    
     
     
     // MARK: - Request with no payload, no response

@@ -135,6 +135,19 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with no payload
     
+    func performRequest<Response>(
+        endpoint: Endpoint,
+        authType: AuthType,
+        response: Response.Type?) async throws -> Response
+    where Response: Decodable {
+        var request = try makeURLRequest(for: endpoint)
+        try authorize(&request, with: authType)
+        let (data, _) = try await urlSession.data(for: request)
+        let decoded = try JSONDecoder().decode(Response.self, from: data)
+        return decoded
+    }
+    
+    
     public func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
