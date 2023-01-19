@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-public protocol NetworkManagerProtocol {
+internal protocol NetworkManagerProtocol {
     
     // MARK: - Request with payload & Response
     
