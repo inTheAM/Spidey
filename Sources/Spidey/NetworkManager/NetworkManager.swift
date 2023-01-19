@@ -21,12 +21,27 @@ public struct NetworkManager {
         self.urlSession = URLSession.shared
     }
     
+    /// Creates a `URL` from the parameters of an endpoint.
+    /// Throws a `URLError.badURL` error if the url could not be created.
+    /// - Returns: A URL.
+    private func makeURL(from endpoint: Endpoint) throws -> URL {
+        guard var components = URLComponents(string: endpoint.url)
+        else { throw RequestError.invalidURL }
+        
+        components.queryItems = endpoint.queryItems
+        
+        guard let url = components.url
+        else { throw RequestError.invalidURL }
+        
+        return url
+    }
+    
     /// Creates a `URLRequest` from the given endpoint.
     /// - Parameters:
     ///   - endpoint: The endpoint for the resource required
     /// - Returns: A URLRequest.
     private func makeURLRequest(for endpoint: Endpoint) throws -> URLRequest {
-        let url = try endpoint.makeURL()
+        let url = try makeURL(from: endpoint)
         var request = URLRequest(url: url, timeoutInterval: .infinity)
         request.httpMethod  =   endpoint.httpMethod.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-type")
@@ -61,19 +76,20 @@ public struct NetworkManager {
 
 extension NetworkManager: NetworkManagerProtocol {
     
-    // MARK: - Request with payload
+    // MARK: - Request with payload & Response
     
     public func performRequest<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
-        payload: Payload) async throws -> Response
+        payload: Payload,
+        response: Response.Type) async throws -> Response
     where Payload: Encodable, Response: Decodable {
         do {
             var request = try makeURLRequest(for: endpoint)
             try authorize(&request, with: authType)
             try attach(payload, to: &request)
-            let data = try await urlSession.data(for: request)
-            let decoded = try JSONDecoder().decode(Response.self, from: data.0)
+            let (data, _) = try await urlSession.data(for: request)
+            let decoded = try JSONDecoder().decode(Response.self, from: data)
             return decoded
         } catch {
             throw RequestError.failed(reason: error.localizedDescription)

@@ -10,7 +10,8 @@ import Foundation
 
 public protocol NetworkManagerProtocol {
     
-    // MARK: - Request with payload
+    // MARK: - Request with payload & Response
+    
     /// Performs a request using the given endpoint, authorization type, and payload.
     /// - Parameters:
     ///   - endpoint: The endpoint for the resource being requested.
@@ -21,6 +22,13 @@ public protocol NetworkManagerProtocol {
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<Response, RequestError>
+    where Payload: Encodable, Response: Decodable
+    
+    func performRequest<Payload, Response>(
+        endpoint: Endpoint,
+        authType: AuthType,
+        payload: Payload,
+        response: Response.Type) async throws -> Response
     where Payload: Encodable, Response: Decodable
     
     // MARK: - Request with no payload
@@ -38,6 +46,8 @@ public protocol NetworkManagerProtocol {
         response: Response.Type?) -> AnyPublisher<Response, RequestError>
     where Response: Decodable
     
+    
+    
     // MARK: - Request with no payload, no response
     /// Performs a request using the given endpoint, authorization type, without any payload.
     ///
@@ -53,6 +63,8 @@ public protocol NetworkManagerProtocol {
     func performRequest(
         endpoint: Endpoint,
         authType: AuthType) async throws -> HTTPURLResponse?
+    
+    
     
     // MARK: - Request with payload, no response
     
