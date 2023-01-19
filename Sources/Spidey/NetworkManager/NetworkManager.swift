@@ -23,6 +23,8 @@ public struct NetworkManager {
     
     /// Creates a `URL` from the parameters of an endpoint.
     /// Throws a `URLError.badURL` error if the url could not be created.
+    /// - Parameters:
+    ///   - endpoint: The endpoint for the resource required 
     /// - Returns: A URL.
     private func makeURL(from endpoint: Endpoint) throws -> URL {
         guard var components = URLComponents(string: endpoint.url)

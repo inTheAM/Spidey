@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// An endpoint on the Mpesa API.
+/// An endpoint for a resource.
 public struct Endpoint {
     
     /// The http method associated with the endpoint.
