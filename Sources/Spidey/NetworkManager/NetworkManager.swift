@@ -81,7 +81,7 @@ public struct NetworkManager {
     where T: Decodable {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        decoder.decode(type, from: data)
+        return try decoder.decode(type, from: data)
     }
 }
 
