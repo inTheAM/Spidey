@@ -145,7 +145,7 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with no payload
     
-    func performRequest<Response>(
+    public func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) async throws -> Response
