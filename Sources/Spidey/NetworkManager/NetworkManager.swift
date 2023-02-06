@@ -56,7 +56,9 @@ public struct NetworkManager {
     ///   - request: The request to attach the payload to.
     private func attach<Payload>(_ payload: Payload, to request: inout URLRequest) throws
     where Payload: Encodable {
-        let body = try JSONEncoder().encode(payload)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let body = try encoder.encode(payload)
         request.httpBody = body
     }
     
@@ -73,6 +75,12 @@ public struct NetworkManager {
         case .bearer(let token):
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
+    }
+
+    private func decode<T>(_ type: T.Type, from data: Data) throws -> T {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.decode(type, from: data)
     }
 }
 
@@ -91,7 +99,7 @@ extension NetworkManager: NetworkManagerProtocol {
             try authorize(&request, with: authType)
             try attach(payload, to: &request)
             let (data, _) = try await urlSession.data(for: request)
-            let decoded = try JSONDecoder().decode(Response.self, from: data)
+            let decoded = try decode(Response.self, from: data)
             return decoded
         } catch {
             throw RequestError.failed(reason: error.localizedDescription)
