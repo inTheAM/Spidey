@@ -77,7 +77,8 @@ public struct NetworkManager {
         }
     }
 
-    private func decode<T>(_ type: T.Type, from data: Data) throws -> T {
+    private func decode<T>(_ type: T.Type, from data: Data) throws -> T
+    where T: Decodable {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         decoder.decode(type, from: data)
