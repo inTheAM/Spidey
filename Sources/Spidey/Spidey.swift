@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 public enum Spidey {
-    static let networkManager = NetworkManager()
+    internal static let networkManager = NetworkManager()
 
     public static func request<Payload, Response>(
         endpoint: Endpoint,
@@ -20,7 +20,7 @@ public enum Spidey {
         try await networkManager.performRequest(endpoint: endpoint, authType: authType, payload: payload, response: response)
     }
 
-    public static func performRequest<Payload, Response>(
+    public static func request<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<Response, RequestError>
@@ -30,7 +30,7 @@ public enum Spidey {
 
     // MARK: - Request with no payload
 
-    public static func performRequest<Response>(
+    public static func request<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) async throws -> Response
@@ -39,7 +39,7 @@ public enum Spidey {
     }
 
 
-    public static func performRequest<Response>(
+    public static func request<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) -> AnyPublisher<Response, RequestError>
@@ -49,7 +49,7 @@ public enum Spidey {
 
     // MARK: - Request with no payload, no response
 
-    public static func performRequest(
+    public static func request(
         endpoint: Endpoint,
         authType: AuthType) async throws -> HTTPURLResponse? {
             try await networkManager.performRequest(endpoint: endpoint, authType: authType)
@@ -63,7 +63,7 @@ public enum Spidey {
 
     // MARK: - Request with payload, no response
 
-    public static func performRequest<Payload>(
+    public static func request<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) async throws -> HTTPURLResponse
@@ -71,7 +71,7 @@ public enum Spidey {
         try await networkManager.performRequest(endpoint: endpoint, authType: authType, payload: payload)
     }
 
-    public static func performRequest<Payload>(
+    public static func request<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<HTTPURLResponse?, RequestError>
