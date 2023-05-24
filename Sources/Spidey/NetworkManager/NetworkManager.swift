@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// The main network manager for performing network calls.
-public struct NetworkManager {
+internal struct NetworkManager {
     
     /// The URLSession instance to use in the requests.
     internal let urlSession: URLSession
@@ -17,7 +17,7 @@ public struct NetworkManager {
     internal init(session: URLSession = .shared) {
         self.urlSession = session
     }
-    public init() {
+    internal init() {
         self.urlSession = URLSession.shared
     }
     
@@ -89,7 +89,7 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with payload & Response
     
-    public func performRequest<Payload, Response>(
+    internal func performRequest<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload,
@@ -107,7 +107,7 @@ extension NetworkManager: NetworkManagerProtocol {
         }
     }
     
-    public func performRequest<Payload, Response>(
+    internal func performRequest<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<Response, RequestError>
@@ -119,18 +119,7 @@ extension NetworkManager: NetworkManagerProtocol {
             dump(request)
             let decoder = JSONDecoder()
             return urlSession.dataTaskPublisher(for: request)
-#if DEBUG
-                .map { output in
-                    if let object = try? JSONSerialization.jsonObject(with: output.data),
-                       let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
-                       let prettyPrintedString = NSString(data: data, encoding: String.Encoding.utf8.rawValue) {
-                        print("\n==========DATA==========\n", prettyPrintedString as Any, "\n\n")
-                    }
-                    return output.data
-                }
-#else
                 .map(\.data)
-#endif
                 .decode(type: Response.self, decoder: decoder)
                 .mapError { error in
                     dump(error, name: "ERROR LOADING DATA: ")
@@ -146,7 +135,7 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with no payload
     
-    public func performRequest<Response>(
+    internal func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) async throws -> Response
@@ -154,12 +143,12 @@ extension NetworkManager: NetworkManagerProtocol {
         var request = try makeURLRequest(for: endpoint)
         try authorize(&request, with: authType)
         let (data, _) = try await urlSession.data(for: request)
-        let decoded = try JSONDecoder().decode(Response.self, from: data)
+        let decoded = try decode(Response.self, from: data)
         return decoded
     }
     
     
-    public func performRequest<Response>(
+    internal func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) -> AnyPublisher<Response, RequestError>
@@ -171,19 +160,7 @@ extension NetworkManager: NetworkManagerProtocol {
             
             let decoder = JSONDecoder()
             return urlSession.dataTaskPublisher(for: request)
-#if DEBUG
-                .map { output in
-                    dump(output)
-                    if let object = try? JSONSerialization.jsonObject(with: output.data),
-                       let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
-                       let prettyPrintedString = NSString(data: data, encoding: String.Encoding.utf8.rawValue) {
-                        print("\n==========DATA==========\n", prettyPrintedString as Any, "\n\n")
-                    }
-                    return output.data
-                }
-#else
                 .map(\.data)
-#endif
                 .decode(type: Response.self, decoder: decoder)
                 .mapError({ error in
                     dump(error, name: "ERROR LOADING DATA: ")
@@ -199,7 +176,7 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with no payload, no response
     
-    public func performRequest(
+    internal func performRequest(
         endpoint: Endpoint,
         authType: AuthType) async throws -> HTTPURLResponse? {
         do {
@@ -212,7 +189,7 @@ extension NetworkManager: NetworkManagerProtocol {
         }
     }
     
-    public func performRequest(
+    internal func performRequest(
         endpoint: Endpoint,
         authType: AuthType) -> AnyPublisher<HTTPURLResponse?, RequestError> {
         do {
@@ -221,17 +198,9 @@ extension NetworkManager: NetworkManagerProtocol {
             dump(request)
             
             return urlSession.dataTaskPublisher(for: request)
-#if DEBUG
-                .map { output in
-                    dump(output)
-                    return output.response as? HTTPURLResponse
-                }
-#else
                 .map { output in
                     return output.response as? HTTPURLResponse
                 }
-                
-#endif
                 .mapError({ error in
                     dump(error, name: "ERROR LOADING DATA: ")
                     return RequestError.failedToDecodeData
@@ -246,7 +215,7 @@ extension NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Request with payload, no response
     
-    public func performRequest<Payload>(
+    internal func performRequest<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) async throws -> HTTPURLResponse
@@ -263,7 +232,7 @@ extension NetworkManager: NetworkManagerProtocol {
         }
     }
     
-    public func performRequest<Payload>(
+    internal func performRequest<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<HTTPURLResponse?, RequestError>
@@ -274,17 +243,9 @@ extension NetworkManager: NetworkManagerProtocol {
             try attach(payload, to: &request)
             dump(request)
             return urlSession.dataTaskPublisher(for: request)
-#if DEBUG
-                .map { output in
-                    dump(output)
-                    return output.response as? HTTPURLResponse
-                }
-#else
                 .map { output in
                     return output.response as? HTTPURLResponse
                 }
-            
-#endif
                 .mapError({ error in
                     dump(error, name: "ERROR LOADING DATA: ")
                     return RequestError.failedToDecodeData
