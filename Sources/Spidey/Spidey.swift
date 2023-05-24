@@ -11,7 +11,7 @@ import Foundation
 public enum Spidey {
     static let networkManager = NetworkManager()
 
-    static func request<Payload, Response>(
+    public static func request<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload,
@@ -20,7 +20,7 @@ public enum Spidey {
         try await networkManager.performRequest(endpoint: endpoint, authType: authType, payload: payload, response: response)
     }
 
-    static func performRequest<Payload, Response>(
+    public static func performRequest<Payload, Response>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<Response, RequestError>
@@ -30,7 +30,7 @@ public enum Spidey {
 
     // MARK: - Request with no payload
 
-    static func performRequest<Response>(
+    public static func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) async throws -> Response
@@ -39,7 +39,7 @@ public enum Spidey {
     }
 
 
-    static func performRequest<Response>(
+    public static func performRequest<Response>(
         endpoint: Endpoint,
         authType: AuthType,
         response: Response.Type?) -> AnyPublisher<Response, RequestError>
@@ -49,13 +49,13 @@ public enum Spidey {
 
     // MARK: - Request with no payload, no response
 
-    static func performRequest(
+    public static func performRequest(
         endpoint: Endpoint,
         authType: AuthType) async throws -> HTTPURLResponse? {
             try await networkManager.performRequest(endpoint: endpoint, authType: authType)
     }
 
-    static func performRequest(
+    public static func performRequest(
         endpoint: Endpoint,
         authType: AuthType) -> AnyPublisher<HTTPURLResponse?, RequestError> {
             networkManager.performRequest(endpoint: endpoint, authType: authType)
@@ -63,7 +63,7 @@ public enum Spidey {
 
     // MARK: - Request with payload, no response
 
-    static func performRequest<Payload>(
+    public static func performRequest<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) async throws -> HTTPURLResponse
@@ -71,7 +71,7 @@ public enum Spidey {
         try await networkManager.performRequest(endpoint: endpoint, authType: authType, payload: payload)
     }
 
-    static func performRequest<Payload>(
+    public static func performRequest<Payload>(
         endpoint: Endpoint,
         authType: AuthType,
         payload: Payload) -> AnyPublisher<HTTPURLResponse?, RequestError>
